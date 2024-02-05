@@ -1,0 +1,65 @@
+# Here are some predefined character sets that might come in handy. Feel free to make your own.
+A2Z = set('abcçdefghijklmnopqrstuvwxyzáéíóúñü')
+VOWS = set('aeiouáéíóúü')
+CONS = A2Z-VOWS
+
+# TODO: Impelement your solution here.
+def buildFST():
+
+    # The states (you need to add more)
+    f = FST('q1') # q1 is the initial (non-accepting) state
+    f.addState('q_r')
+    f.addState('q_epsilon')
+    f.addState('q_EOW', True) # An accepting state
+
+    #Adding additional Steps
+    f.addState('q2')
+    f.addState('q3')
+    f.addState('q4')
+    f.addState('q5')
+    f.addState('q6')
+    f.addState('q7')
+    f.addState('q8')
+    f.addState('q9')
+    f.addState('q10')
+
+
+
+
+
+    # The transitions (you need to add more)
+    f.addSetTransition('q1', A2Z, 'q1') # Self-loop on all letters to transition through stem
+    f.addSetTransition('q1', A2Z-{'ñ'}-VOWS,'q2') #
+    f.addSetTransition('q1', A2Z,'q6')
+    f.addSetTransition('q1', A2Z-{'g','q'},'q7')
+    f.addTransition('q6', 'a', 'ó', 'q_r')
+    f.addSetTransition('q1', A2Z-VOWS, 'q5')
+    f.addTransition('q2', 'a', 'ó', 'q_r') # Transition on vowel of ending, with a ==> ó and e ==> ió and i ==> ió
+    f.addTransition('q2', 'e', 'ió', 'q_r')
+    f.addTransition('q2', 'i', 'ió', 'q_r')
+
+    ## Exception 1 
+    f.addTransition('q1','ñ','ñ' , 'q3')          # Rule 1
+    f.addTransition('q3','e','ó','q_r')           # Rule 1a
+    f.addTransition('q3','i','ó','q_r')           # Rule 1b
+
+    ## Exception 2
+    f.addSetTransition('q2',VOWS , 'q4')          # Rule 2
+    f.addTransition('q4','e','yó','q_r')          # Rule 2a
+    f.addTransition('q4','i','yó','q_r')          # Rule 2b
+    f.addSetTransition('q7',{'g','q'},'q8')
+    f.addSetTransition('q8',{'u'},'q2')           # Rule 2c, 2d guió, quió
+
+    ## Exception 3
+    f.addSetTransition('q1',A2Z - {'e'} , 'q9')   # Rule 3
+    f.addTransition('q9','e','i','q10')          # Rule 3
+    f.addSetTransition('q10',CONS , 'q10')        # Rule 3
+    f.addTransition('q10','i','ió','q_r')         # Rule 3
+
+
+
+    f.addTransition('q_r', 'r', '', 'q_epsilon') # Transition on final r in infinitive - replace with empty string
+    f.addTransition('q_epsilon', '', '', 'q_EOW') # If see empty string, at end of word
+
+    # Return your completed FST
+    return f
